@@ -1,0 +1,23 @@
+Crie um MCP que acesse a API pública do Instagram, sem exigir autenticação, para obter todos os vídeos de uma determinada conta. Para cada vídeo dessa lista, traga as informações básicas junto com o número de visualizações e o número de curtidas.
+
+Caso a resposta venha paginada, percorra o máximo de páginas possível. Se ocorrer algum erro de acesso durante esse processo, ignore-o e prossiga, armazenando apenas o que foi possível baixar.
+
+A lista de vídeos deve ser salva em resources/videos/<conta>/lista.csv e organizada por ordem de publicação, do vídeo mais novo para o mais antigo. O MCP poderá ser executado mais de uma vez e, quando isso acontecer, basta atualizar a lista inserindo os vídeos mais recentes no início.
+
+Utilize Node.JS (javascript) e salve o MCP na pasta resources/mcps/<nome do mcp>.
+
+## Orientações técnicas
+
+- Não use login, sessão autenticada, cookies manuais, Playwright ou Puppeteer. Use apenas chamadas HTTP públicas via Node.js.
+- Resolva o perfil com `GET https://www.instagram.com/api/v1/users/web_profile_info/?username=<conta>`.
+- Use headers de navegador, incluindo `User-Agent`, `Accept-Language`, `Referer` e `x-ig-app-id: 936619743392459`.
+- Para a listagem principal, use `POST https://www.instagram.com/graphql/query`, com a query/friendly name relacionada a `PolarisProfilePostsTabContentQuery`.
+- Antes do GraphQL, faça `GET https://www.instagram.com/<conta>/` para obter `csrftoken` e `lsd` públicos do HTML/cookies.
+- Paginação principal: use `end_cursor` da conexão `xdt_api__v1__feed__user_timeline_graphql_connection`.
+- Trate o `doc_id` como variável instável: tenha um valor padrão, permita sobrescrever por variável de ambiente e tente raspar o `doc_id` atual dos bundles JS se a primeira página falhar.
+- Considere vídeo quando `media_type === 2`, `product_type === "clips"` ou `product_type === "igtv"`.
+- Normalize os campos: `shortcode`, `url`, `type`, `taken_at`, `timestamp`, `views`, `likes`, `comments`, `duration`, `caption` e `thumbnail`.
+- Mapeie `views` a partir de `play_count`, `ig_play_count` ou `view_count`; mapeie `likes` a partir de `like_count`.
+- Fallback, se o GraphQL não trouxer vídeos: `GET https://www.instagram.com/api/v1/feed/user/<id>/?count=33&max_id=<cursor>`, usando `next_max_id` e `more_available`.
+- Faça merge do CSV por `shortcode`, atualizando métricas dos vídeos existentes e mantendo a ordenação do mais novo para o mais antigo.
+- Exponha uma ferramenta MCP simples, como `fetch_account_videos`, recebendo `username` e opcionalmente `maxPages`.

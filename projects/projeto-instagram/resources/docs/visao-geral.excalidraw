@@ -1,0 +1,51 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "id": "syH9_4rUfm7tjiHk-HjWX",
+      "type": "text",
+      "x": 230,
+      "y": 133.55555831502974,
+      "width": 441.879638671875,
+      "height": 175,
+      "angle": 0,
+      "strokeColor": "#ffffff",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a4",
+      "roundness": null,
+      "seed": 1894748204,
+      "version": 210,
+      "versionNonce": 452571820,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1793413781953,
+      "link": null,
+      "locked": false,
+      "text": "@fulanodetal\n\n1. Lista de Vídeos (views, likes)\n2. Os TOP 5 Vídeos\n3. Transcrever os vídeos\n4. Juntar as transcrições em um único arquivo\n5. Realizar a análise do perfil de comunicação",
+      "fontSize": 20,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "@fulanodetal\n\n1. Lista de Vídeos (views, likes)\n2. Os TOP 5 Vídeos\n3. Transcrever os vídeos\n4. Juntar as transcrições em um único arquivo\n5. Realizar a análise do perfil de comunicação",
+      "autoResize": true,
+      "lineHeight": 1.25
+    }
+  ],
+  "appState": {
+    "gridSize": 20,
+    "gridStep": 5,
+    "gridModeEnabled": false,
+    "viewBackgroundColor": "#000"
+  },
+  "files": {}
+}
