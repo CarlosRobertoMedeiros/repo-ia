@@ -15,7 +15,8 @@ const HEADERS = {
   origin: 'https://www.youtube.com',
   referer: 'https://www.youtube.com/',
 };
-const CONCORRENCIA = 4;
+// Poucas requisições simultâneas, com pausa entre elas, para não acionar o anti-bot.
+const CONCORRENCIA = 2;
 const CHANNEL_ID = /^UC[\w-]{22}$/;
 const VIDEO_ID = /^[\w-]{11}$/;
 
@@ -138,14 +139,24 @@ function normalizar(data, videoId) {
   };
 }
 
+// O YouTube pede verificação anti-bot quando há requisições demais do mesmo IP.
+const ehBloqueio = (data) => !data.videoDetails && data.playabilityStatus?.status === 'LOGIN_REQUIRED';
+
 async function detalhar(ids, erros, delayMs) {
   const videos = [];
   const fila = [...ids];
+  let bloqueado = false;
   async function trabalhador() {
-    while (fila.length) {
+    while (fila.length && !bloqueado) {
       const id = fila.shift();
       try {
         const data = await comRetentativa(() => innertube('player', { videoId: id }), delayMs);
+        if (ehBloqueio(data)) {
+          // Respeita o bloqueio: para de consultar e salva o que já foi obtido.
+          bloqueado = true;
+          return;
+        }
+        await sleep(delayMs);
         const v = normalizar(data, id);
         if (v.timestamp) videos.push(v);
         else erros.push(`vídeo ${id}: sem data de publicação, ignorado`);
@@ -155,12 +166,18 @@ async function detalhar(ids, erros, delayMs) {
     }
   }
   await Promise.all(Array.from({ length: CONCORRENCIA }, trabalhador));
+  if (bloqueado) {
+    erros.push(`YouTube pediu verificação anti-bot; ${ids.length - videos.length} vídeos ficaram sem detalhes. `
+      + 'Rode novamente mais tarde: os que faltam na lista são buscados primeiro.');
+  }
   return videos;
 }
 
-export async function fetchVideos(conta, { maxPages = 50, delayMs = 300 } = {}) {
+// `conhecidos`: ids já salvos na lista; os que ainda não estão nela são detalhados primeiro,
+// para que execuções repetidas completem a lista mesmo que a coleta seja interrompida.
+export async function fetchVideos(conta, { maxPages = 50, delayMs = 300, conhecidos = new Set() } = {}) {
   const estado = { ids: new Set(), erros: [], paginas: 0 };
-  const resultado = (videos = []) => ({ videos, erros: estado.erros, paginas: estado.paginas });
+  const resultado = (videos = []) => ({ videos, erros: estado.erros, paginas: estado.paginas, listados: estado.ids.size });
 
   let channelId;
   try {
@@ -175,5 +192,7 @@ export async function fetchVideos(conta, { maxPages = 50, delayMs = 300 } = {}) 
   await listar({ browseId: `VLUU${channelId.slice(2)}` }, 'uploads', estado, opcoes);
   if (!estado.ids.size) await listarPorAbas(channelId, estado, opcoes);
 
-  return resultado(await detalhar([...estado.ids], estado.erros, delayMs));
+  const ids = [...estado.ids];
+  const fila = [...ids.filter((id) => !conhecidos.has(id)), ...ids.filter((id) => conhecidos.has(id))];
+  return resultado(await detalhar(fila, estado.erros, delayMs));
 }

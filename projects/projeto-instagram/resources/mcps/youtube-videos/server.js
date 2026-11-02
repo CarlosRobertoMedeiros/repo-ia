@@ -46,14 +46,15 @@ export async function atualizarLista(username, maxPages = 50) {
   const arquivo = path.join(RAIZ, 'resources', 'videos', conta, 'lista.csv');
   // Lê antes de baixar para falhar cedo se o arquivo existente não for desta MCP.
   const existentes = await lerLista(arquivo);
-  const { videos, erros, paginas } = await fetchVideos(conta, { maxPages });
+  const conhecidos = new Set(existentes.map((v) => v.video_id));
+  const { videos, erros, paginas, listados } = await fetchVideos(conta, { maxPages, conhecidos });
   const { linhas, novos } = mesclar(existentes, videos);
   const salvou = videos.length > 0 || existentes.length > 0;
   if (salvou) await salvarLista(arquivo, linhas);
 
   return [
     `Conta: ${conta}`,
-    `Páginas lidas: ${paginas}`,
+    `Páginas lidas: ${paginas} (${listados} vídeos listados no canal)`,
     `Vídeos obtidos nesta execução: ${videos.length} (${novos} novos)`,
     `Total na lista: ${linhas.length}`,
     `Arquivo: ${salvou ? arquivo : '(nada salvo)'}`,
