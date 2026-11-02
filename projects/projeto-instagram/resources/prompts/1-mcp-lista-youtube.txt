@@ -6,18 +6,8 @@ A lista de vídeos deve ser salva em resources/videos/<conta>/lista.csv e organi
 
 Utilize Node.JS (javascript) e salve o MCP na pasta resources/mcps/<nome do mcp>.
 
+Realize um teste com essa conta do youtube @FabricioPacholok 
+
 ## Orientações técnicas
 
 - Não use login, sessão autenticada, cookies manuais, Playwright ou Puppeteer. Use apenas chamadas HTTP públicas via Node.js.
-- Resolva o perfil com `GET https://www.youtube.com/api/v1/users/web_profile_info/?username=<conta>`.
-- Use headers de navegador, incluindo `User-Agent`, `Accept-Language`, `Referer` e `x-ig-app-id: 936619743392459`.
-- Para a listagem principal, use `POST https://www.youtube.com/graphql/query`, com a query/friendly name relacionada a `PolarisProfilePostsTabContentQuery`.
-- Antes do GraphQL, faça `GET https://www.youtube.com/<conta>/` para obter `csrftoken` e `lsd` públicos do HTML/cookies.
-- Paginação principal: use `end_cursor` da conexão `xdt_api__v1__feed__user_timeline_graphql_connection`.
-- Trate o `doc_id` como variável instável: tenha um valor padrão, permita sobrescrever por variável de ambiente e tente raspar o `doc_id` atual dos bundles JS se a primeira página falhar.
-- Considere vídeo quando `media_type === 2`, `product_type === "clips"` ou `product_type === "igtv"`.
-- Normalize os campos: `shortcode`, `url`, `type`, `taken_at`, `timestamp`, `views`, `likes`, `comments`, `duration`, `caption` e `thumbnail`.
-- Mapeie `views` a partir de `play_count`, `ig_play_count` ou `view_count`; mapeie `likes` a partir de `like_count`.
-- Fallback, se o GraphQL não trouxer vídeos: `GET https://www.youtube.com/api/v1/feed/user/<id>/?count=33&max_id=<cursor>`, usando `next_max_id` e `more_available`.
-- Faça merge do CSV por `shortcode`, atualizando métricas dos vídeos existentes e mantendo a ordenação do mais novo para o mais antigo.
-- Exponha uma ferramenta MCP simples, como `fetch_account_videos`, recebendo `username` e opcionalmente `maxPages`.
