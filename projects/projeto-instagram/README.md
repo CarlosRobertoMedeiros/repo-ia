@@ -5,7 +5,7 @@ Pipeline que transforma os **YouTube Shorts de um criador** num **perfil de comu
 Tudo roda dentro do [Claude Code](https://claude.com/claude-code):
 
 - **3 servidores MCP em Node.js** coletam os dados: lista de Shorts, download dos mais curtidos e transcrição.
-- **6 Skills** analisam as transcrições e sintetizam o perfil.
+- **7 Skills** analisam as transcrições, sintetizam o perfil e orquestram o pipeline completo para um canal (`/youtube-shorts-perfil-canal @conta`).
 - **Specs** em Markdown descrevem cada execução como um checklist auditável.
 
 ```mermaid
@@ -60,7 +60,7 @@ Tudo é julgado pela **régua do Shorts** (feed vertical, scroll, loop, tom lo-f
 ## Estrutura do repositório
 
 ```
-projeto-instagram/
+projeto-youtube/
 ├── .claude/
 │   └── skills/                                   # Skills do Claude Code
 │       ├── youtube-shorts-contexto/              # lente base + script que junta transcrições
@@ -70,7 +70,8 @@ projeto-instagram/
 │       ├── youtube-shorts-analise-retencao/SKILL.md
 │       ├── youtube-shorts-analise-storytelling/SKILL.md
 │       ├── youtube-shorts-analise-vocabulario/SKILL.md
-│       └── youtube-shorts-analise-perfil-comunicacao/SKILL.md
+│       ├── youtube-shorts-analise-perfil-comunicacao/SKILL.md
+│       └── youtube-shorts-perfil-canal/SKILL.md      # orquestra o pipeline completo para um @canal
 ├── .spec/                                        # execuções planejadas/registradas, uma por criador
 │   ├── perfil-fabriciopacholok/spec.md
 │   └── perfil-marcioatalla/spec.md
@@ -117,7 +118,7 @@ Funciona em Windows, macOS e Linux.
 
 ```bash
 git clone https://github.com/CarlosRobertoMedeiros/repo-ia.git
-cd repo-ia/projects/projeto-instagram
+cd repo-ia/projects/projeto-youtube
 ```
 
 Instale as dependências dos MCPs que usam `ffmpeg-static`. O `youtube-shorts` não tem dependências.
@@ -138,15 +139,58 @@ cp resources/mcps/video-transcricao/.env.example resources/mcps/video-transcrica
 
 Edite `resources/mcps/video-transcricao/.env` e preencha `GROQ_API_KEY=gsk_...`. O `.env` está no `.gitignore` e **nunca** deve ser commitado.
 
-Abra o Claude Code **na pasta `projeto-instagram`**. O arquivo `.mcp.json` registra os três MCPs automaticamente, e na primeira vez o Claude Code pede para você aprovar os servidores do projeto. As Skills em `.claude/skills/` também são detectadas sozinhas. Se você criar ou editar uma skill com a sessão aberta, rode `/reload-skills`.
+Abra o Claude Code **na pasta `projeto-youtube`**. O arquivo `.mcp.json` registra os três MCPs automaticamente, e na primeira vez o Claude Code pede para você aprovar os servidores do projeto. As Skills em `.claude/skills/` também são detectadas sozinhas. Se você criar ou editar uma skill com a sessão aberta, rode `/reload-skills`.
 
 ---
 
 ## Como usar
 
-### Opção 1: executar uma spec (recomendado)
+### Opção 1: pipeline completo para qualquer canal (recomendado)
 
-Cada criador tem uma spec com o passo a passo completo. No Claude Code, peça:
+A skill `youtube-shorts-perfil-canal` roda tudo de ponta a ponta para o canal que você informar como parâmetro. No Claude Code, digite:
+
+```
+/youtube-shorts-perfil-canal @<conta> [quantidade] [idioma]
+```
+
+| Parâmetro | Obrigatório | Padrão | Descrição |
+|---|---|---|---|
+| `@<conta>` | sim | — | Handle do canal (com ou sem `@`) ou URL do canal |
+| `quantidade` | não | `3` | Quantos shorts mais curtidos baixar, transcrever e analisar |
+| `idioma` | não | detecção automática | Idioma falado nos vídeos (`pt`, `en`, `es`…) |
+
+Exemplos:
+
+```
+/youtube-shorts-perfil-canal @fabriciopacholok
+```
+
+```
+/youtube-shorts-perfil-canal @marcioatalla 10 pt
+```
+
+```
+/youtube-shorts-perfil-canal @microtalesshort07 5 en
+```
+
+Também funciona em linguagem natural: *"gere o perfil completo do canal @marcioatalla com os 10 shorts mais curtidos"*.
+
+O que a skill faz, em ordem:
+
+1. **Spec:** cria `.spec/perfil-<conta>/spec.md` a partir do [template](resources/templates/spec-perfil-influenciador.md). Se a spec já existir, reaproveita e não refaz os itens já marcados.
+2. **Lista** os shorts do canal (MCP `youtube-shorts`) e preenche as *Observações* da spec: idioma, cortes com convidados, vídeos sem fala.
+3. **Baixa** os `quantidade` shorts mais curtidos (MCP `youtube-shorts-top-video-downloads`).
+4. **Transcreve** os vídeos (MCP `video-transcricao`).
+5. **Analisa** ganchos, retenção, storytelling e vocabulário (as 4 skills de análise, com a lente da `youtube-shorts-contexto`).
+6. **Gera o perfil** `resources/shorts/<conta>/perfil-<conta>.md` (skill `youtube-shorts-analise-perfil-comunicacao`).
+
+Cada passo é marcado `[x]` na spec com **data/hora, ferramenta e evidência**. Erros parciais (um vídeo que falhou) são registrados e o processo segue. Erros bloqueantes, como a falta da `GROQ_API_KEY`, param o processo e avisam.
+
+> Depois de clonar ou de criar a skill com a sessão aberta, rode `/reload-skills` para ela aparecer.
+
+### Opção 2: executar uma spec existente
+
+Se você já tem uma spec (gerada pela opção 1 ou escrita à mão), peça:
 
 ```
 execute a spec .spec\perfil-fabriciopacholok\spec.md e marque cada passo executado registrando as evidências de execução com data e hora
@@ -160,7 +204,7 @@ Para um criador novo, gere a spec a partir do template:
 gere a spec do @<conta> a partir de resources/templates/spec-perfil-influenciador.md
 ```
 
-### Opção 2: passo a passo manual
+### Opção 3: passo a passo manual
 
 | # | O que pedir ao Claude Code | Ferramenta |
 |---|---|---|
@@ -175,7 +219,7 @@ gere a spec do @<conta> a partir de resources/templates/spec-perfil-influenciado
 
 As Skills também disparam por linguagem natural ("analisa os ganchos…", "como ele fala?", "quais os bordões dele?", "monta o perfil de voz…") e aceitam **texto colado direto no prompt**, além de pastas.
 
-### Opção 3: usar o perfil para escrever uma copy
+### Opção 4: usar o perfil para escrever uma copy
 
 Abra uma conversa nova com qualquer IA e cole:
 
@@ -282,6 +326,7 @@ As Skills ficam em `.claude/skills/` e seguem o formato do Claude Code: um `SKIL
 | `youtube-shorts-analise-storytelling` | Formato, estrutura, personagens, loops e payoffs, batidas emocionais, específico vs. abstrato. Extrai templates de roteiro | "storytelling", "narrativa", "arco", "roteiro" | `analise-storytelling.md` |
 | `youtube-shorts-analise-vocabulario` | Bordões com contagem, gírias, jargão, inglês, tratamento, palavrões, oralidade e regionalismos. Monta um guia de voz | "vocabulário", "como ele fala", "bordões", "gírias" | `analise-vocabulario.md` |
 | `youtube-shorts-analise-perfil-comunicacao` | **Síntese.** Consolida as 4 análises (ou faz as análises a partir das transcrições brutas) num perfil prescritivo e autossuficiente | "perfil de comunicação", "perfil de voz", "guia de estilo", "escrever como ele" | `perfil-comunicacao-<criador>.md` |
+| `youtube-shorts-perfil-canal` | **Orquestrador.** Recebe `@conta [quantidade] [idioma]`, gera a spec pelo template e executa todo o pipeline (MCPs + 4 análises + perfil), registrando as evidências com data e hora | "perfil completo do canal", "rode tudo para @conta", "pipeline completo" | `.spec/perfil-<conta>/spec.md` + `perfil-<conta>.md` e análises `youtube-shorts-analise-*.md` |
 
 ### Princípios comuns das análises
 
@@ -392,7 +437,7 @@ Com apenas 3 vídeos, o perfil declara **confiança baixa**. Para um perfil robu
 | Aviso de verificação anti-bot na listagem | O YouTube limitou o player | Os dados seguem pela página de exibição. Rode de novo mais tarde para completar as datas |
 | Download falha em alguns vídeos | Formato indisponível nos clientes públicos | O MCP segue com os demais. Tente de novo depois |
 | Erro 429 na transcrição | Limite de áudio por hora da Groq | O MCP espera e tenta de novo. Se passar de 5 min, rode depois (os já transcritos são pulados) |
-| MCP não aparece no Claude Code | Sessão aberta fora da pasta do projeto ou servidor não aprovado | Abra o Claude Code em `projeto-instagram` e aprove os servidores do `.mcp.json` |
+| MCP não aparece no Claude Code | Sessão aberta fora da pasta do projeto ou servidor não aprovado | Abra o Claude Code em `projeto-youtube` e aprove os servidores do `.mcp.json` |
 | Skill nova/editada não aparece | Cache de skills | Rode `/reload-skills` |
 
 ---

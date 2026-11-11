@@ -84,8 +84,20 @@ function escolher(sd) {
     .filter((f) => ehMp4(f) && /avc1/.test(f.mimeType)) // H.264 para máxima compatibilidade
     .sort((a, b) => altura(b) - altura(a) || (b.bitrate || 0) - (a.bitrate || 0))[0]
     || adapt.filter(ehMp4).sort((a, b) => altura(b) - altura(a))[0];
-  const audio = adapt.filter((f) => /^audio\/mp4/.test(f.mimeType || '')).sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0];
+  const audios = adapt.filter((f) => /^audio\/mp4/.test(f.mimeType || ''));
+  const audio = faixaOriginal(audios).sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0];
   return video && audio ? { video, audio } : null;
+}
+
+// Vídeos com dublagem automática do YouTube trazem várias faixas de áudio (audioTrack).
+// Fica só com a faixa original do criador: a marcada como padrão (audioIsDefault) ou,
+// na falta dela, a que tiver "original" no nome. Sem audioTrack (faixa única), mantém todas.
+function faixaOriginal(audios) {
+  if (!audios.some((f) => f.audioTrack)) return audios;
+  const padrao = audios.filter((f) => f.audioTrack?.audioIsDefault);
+  if (padrao.length) return padrao;
+  const original = audios.filter((f) => /original/i.test(`${f.audioTrack?.displayName || ''} ${f.audioTrack?.id || ''}`));
+  return original.length ? original : audios;
 }
 
 // Tenta os clientes em ordem e devolve os formatos escolhidos + o cliente que os obteve.
