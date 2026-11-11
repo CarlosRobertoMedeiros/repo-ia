@@ -1,0 +1,21 @@
+{
+  "name": "youtube-shorts-top-video-downloads-mcp",
+  "version": "1.0.0",
+  "description": "MCP que baixa os Shorts mais curtidos de um canal do YouTube a partir do CSV gerado pelo MCP youtube-shorts, sem login",
+  "type": "module",
+  "main": "server.js",
+  "bin": {
+    "youtube-shorts-top-video-downloads-mcp": "server.js"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  }
+}

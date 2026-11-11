@@ -1,0 +1,21 @@
+Crie um MCP em Node.js (JavaScript) que receba arquivos de vídeo e gere a transcrição de cada um em texto. Quero poder transcrever tanto um vídeo específico quanto uma pasta inteira de vídeos de uma vez.
+
+Para cada vídeo, salve a transcrição num arquivo de texto simples ao lado do próprio vídeo (na mesma pasta), contendo apenas o texto falado — sem cabeçalho, sem metadados, só a transcrição limpa.
+
+A transcrição em si deve ser feita usando a API da groq. A chave da groq deve vir de um arquivo de variáveis de ambiente (.env) na raiz do projeto, e o MCP deve avisar de forma clara caso essa chave não esteja configurada.
+
+Como os arquivos de vídeo costumam ser pesados e a transcrição só precisa do áudio, extraia primeiro o áudio do vídeo antes de enviar para a API — buscando o menor tamanho possível sem perder a clareza da fala.
+
+Quero que isso funcione de forma portátil em qualquer sistema operacional, sem depender de eu instalar nada extra na minha máquina. Fique atento ao limite de tamanho que a API da groq aceita: se o áudio de algum vídeo for grande demais, dê um jeito de contornar isso para que a transcrição ainda funcione
+
+Pense também no uso no dia a dia: ao transcrever uma pasta, se um vídeo já tiver sido transcrito antes, pule-o (mas me deixe forçar a refazer quando eu quiser); e se der erro em algum vídeo específico, ignore esse e continue com os demais, sem travar o processo todo
+
+Use os melhores caminhos técnicos que você julgar adequados para atender a tudo isso
+
+Salve o MCP na pasta resources/mcps/video-transcricao e registre-o no arquivo de configuração de MCPs na raiz do projeto
+
+Após construir o MCP, instale as dependências do Node (execute o npm install na pasta do MCP) para que ele fique pronto para uso
+
+Para o arquivo gerado .env crie a estrutura com as permissoes de acesso de api key do groq e todas as configurações referentes a transcrição
+
+Não execute e nem teste a funcionalidade - apenas implante o MCP; eu mesmo farei os testes

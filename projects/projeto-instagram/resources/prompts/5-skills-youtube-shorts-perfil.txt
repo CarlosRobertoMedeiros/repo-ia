@@ -1,0 +1,13 @@
+Quero criar uma skill chamada "youtube-shorts-analise-perfil-comunicacao". Ela é a etapa de síntese de um conjunto de skills que analisam vídeos do Youtube(Shorts) de um influenciador em dimensões separadas (ganchos de abertura, vocabulário/tom, storytelling e retenção), além de uma skill de contexto da plataforma (""youtube-shorts-contexto") que descreve a gramática do shorts.
+
+Esta skill nova pega essas análises e junta tudo num único "perfil de comunicação" do criador, salvo como arquivo Markdown. O perfil não é um relatório para ler e esquecer: é uma ferramenta reutilizável que eu entrego depois junto de uma copy qualquer para a IA reescrever o texto na voz daquele influenciador. Por isso ele precisa ser prescritivo (regras acionáveis, não observações) e autossuficiente (funcionar mesmo colado numa conversa nova, sem acesso às transcrições nem às outras skills).
+
+A skill deve disparar quando o pedido envolver criar/gerar o perfil de comunicação, consolidar a análise, perfil de voz, guia de estilo do influenciador, juntar as análises num perfil, ou quando o objetivo for um artefato que permita escrever copy no estilo de alguém
+
+O input vem no próprio prompt. Pode chegar de dois jeitos: as análises já prontas (vai direto para a síntese) ou só as transcrições brutas (primeiro produz as análises e depois sintetiza, para a sill funcionar sozinha de ponta a ponta). Quando vierem transcrições, lembrar que a consistência entre vários vídeos é o que define o perfil: traço que aparece uma vez é acidente, o que se repete é assinatura
+
+Antes de sintetizar, carregar a lente de plataforma lendo a sill "youtube-shorts-contexto". Ao juntar as dimensões, resolver sobreposições (citar cada traço uma vez só, no lugar mais forte), priorizar a assinatura que diferencia a voz, ancorar tudo em citações literais e definir claramente o que evitar (anti-padrões de registro, palavra e ritmo)
+
+A saída é um arquivo Markdown com nome vindo do prompt (ou "perfil-comunicacao-<criador>.md" no diretório atual, informando onde salvou). Ele segue um template fixo com estas seções: resumo de voz, princípios da voz (regras curtas, cada uma com seu porquê). gancho/ abertura, vocabulário e tom (incluindo bordões e lista de "evitar"), estrutura narrativa, retenção e ritmo, banco de exemplos literais, e por fim "como aplicar a uma copy" com passo a passo e um checklist de conformidade. Todas as seções de análise devem trazer exemplos literais como âncoras de calibração.
+
+Gere o SKILL.md completo dessa skill, com frontmatter (name e uma description acionável que ajude o disparo) e o corpo em português

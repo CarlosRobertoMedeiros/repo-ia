@@ -1,0 +1,21 @@
+{
+  "name": "video-transcricao-mcp",
+  "version": "1.0.0",
+  "description": "MCP que transcreve vídeos (um arquivo ou uma pasta inteira) com a API da Groq (Whisper), extraindo antes só o áudio compactado",
+  "type": "module",
+  "main": "server.js",
+  "bin": {
+    "video-transcricao-mcp": "server.js"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  }
+}

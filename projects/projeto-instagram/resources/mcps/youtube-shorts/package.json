@@ -1,0 +1,12 @@
+{
+  "name": "youtube-shorts-mcp",
+  "version": "1.0.0",
+  "description": "MCP que lista os Shorts de um canal do YouTube (views e curtidas) pela API pública, sem login",
+  "type": "module",
+  "main": "server.js",
+  "bin": { "youtube-shorts-mcp": "server.js" },
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}

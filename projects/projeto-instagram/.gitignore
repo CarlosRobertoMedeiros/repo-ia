@@ -1,0 +1,11 @@
+# Configurações locais com segredos (ex.: GROQ_API_KEY no .env)
+.env
+
+# Vídeos baixados pelo MCP youtube-shorts-top-video-downloads (pesados; não vão para o git)
+*.mp4
+
+# Dependências do Node (recriadas com npm install em cada MCP)
+node_modules/
+
+# Corpus temporário gerado pelo script juntar-transcricoes.js (opção --saida)
+_corpus*.txt

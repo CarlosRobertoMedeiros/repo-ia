@@ -1,0 +1,38 @@
+Quero que você crie um conjunto de Skills para analisar transcrições de vídeos do Youtube (Shorts). A ideia é simples: eu te aponto uma pasta cheia de transcrições de um influenciador, você junta tudo num texto só e roda a análise por critério. Cada critério é uma Skill separada, porque eu quero poder usar uma de cada vez ou todas juntas, do meu jeito.
+
+As Skills são estas:
+
+1. CONTEXTO (a base)
+
+Uma Skill que explica como o Youtube/Shorts funciona de verdade: a gramática de viralização — gancho nos primeiros segundos, retenção, tom casual/lo-fi, gatilhos de comentário, loops, cultura de internet BR. Ela não analisa nada sozinha; ela é a LENTE que todas as outras usam. Toda Skill de análise começa lendo o contexto pra julgar as coisas pela régua certa do youtube video shorts, não pela régua de um texto formal qualquer.
+
+2. GANCHOS
+
+Analisa só os primeiros segundos de cada vídeo. Classifica o TIPO de gancho, explica por que aquilo trava o scroll e mapeia os padrões de abertura que o criador repete.
+
+3. RETENÇÃO
+
+Pattern interrupts, lacunas de curiosidade, cliffhangers, re-gancho no meio, mudança de ritmo, gatilhos de engajamento e o loop/CTA de fechamento.
+
+4. STORYTELLING
+
+Analisa a construção narrativa: arco da história, uso de personagens e exemplos concretos, loops abertos e payoffs, estrutura de argumento (listas, jornada), batidas emocionais, e o uso do específico vs. abstrato.
+
+5. VOCABULÁRIO
+
+Analisa o jeito de falar: gírias, bordões, formas de tratamento, complexidade das frases, palavrões, referências culturais e expressões recorrentes.
+
+Como elas se relacionam:
+- O CONTEXTO é compartilhado. As quatro Skills de análise (ganchos, retenção, storytelling, vocabulário) leem o contexto como base antes de analisar.
+- Cada uma cobre uma dimensão diferente da comunicação. Juntas, dão o retrato completo de como aquele criador comunica.
+
+- Elas precisam ser independentes: eu posso rodar só "ganchos" hoje e só "vocabulário" amanhã, sem depender das outras.
+
+Como cada Skill de análise deve funcionar (flexível):
+- Eu posso passar o texto direto no prompt (uma transcrição ou várias coladas juntas), OU apontar uma pasta com os arquivos de transcrição.
+- Quando eu apontar a pasta, a Skill junta todas as transcrições num único texto e analisa o conjunto, procurando os PADRÕES recorrentes do criador — não é analisar um vídeo isolado, é entender o estilo dele no geral.
+- O resultado tem que ser prático e específico, com exemplos reais tirados das transcrições, não conselho genérico.
+
+Crie cada Skill com nome claro (ex: youtube-shorts-contexto, youtube-shorts-analise-ganchos, youtube-shorts-analise-retencao, youtube-shorts-analise-storytelling, youtube-shorts-analise-vocabulario) e uma descrição que dispare nos termos que eu usaria de verdade ("ganchos", "aberturas", "retenção", "como ele fala", "bordões", "storytelling", etc.).
+
+Crie as skills na pasta atual

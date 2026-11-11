@@ -1,0 +1,21 @@
+Crie um MCP em Node.js (JavaScript) que leia o arquivo CSV gerado anteriormente com a lista de vídeos de uma conta dos shorts do Youtube. O MCP deve receber o caminho desse CSV de forma flexível, sem ficar preso a uma estrutura rígida de pastas, e a partir dele identificar a conta correspondente.
+
+Ao ler o arquivo, ordene os shorts do youtube pela quantidade de curtidas (coluna likes), do mais curtido para o menos curtido, ignorando a quantidade de visualizações para fins de ordenação.
+
+A partir dessa ordem, baixe uma quantidade específica de shorts do youtube informada pelo usuário, começando sempre pelos mais curtidos. Cada vídeo é identificado pela coluna video_id do CSV (esse é o "ID" do vídeo) — atenção: a URL direta do arquivo de vídeo (.mp4) NÃO está no CSV. Ela precisa ser resolvida online a partir do video_id.
+
+Para resolver e baixar os vídeos, use uma estratégia pública que não exija nenhuma autenticação (sem login, cookies ou tokens). Não use endpoints que caiam em "login wall". A abordagem que funciona é consultar o GraphQL público (web) do youtube por shorts com video_id e extrair o campo url do nó xdt_shortcode_media. Para isso:
+
+Envie os headers de um navegador, incluindo x-ig-app-id: 936619743392459 e um User-Agent de browser.
+
+Caso ocorra algum erro de acesso ou download em qualquer vídeo, ignore-o e prossiga, baixando apenas os vídeos possíveis.
+
+Ao baixar cada vídeo, o nome do arquivo deve ser o número da sua ordem seguido de underline e o video_id do short (o mais curtido recebe 1, o próximo 2, e assim por diante). Armazene os vídeos baixados dentro da pasta da conta referenciada pelo CSV.
+
+Salve o MCP na pasta resources/mcps/youtube-shorts-top-video-downloads e registre-o no arquivo de configuração de MCPs na raiz do projeto
+
+Após construir o MCP, instale as dependências do Node (execute o npm install na pasta do MCP) para que ele fique pronto para uso
+
+Não execute e nem teste a funcionalidade - apenas implemente o MCP; eu mesmo farei os testes
+
+

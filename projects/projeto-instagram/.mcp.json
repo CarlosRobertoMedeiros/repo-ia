@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "youtube-shorts": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "resources/mcps/youtube-shorts/server.js"
+      ]
+    },
+    "youtube-shorts-top-video-downloads": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "resources/mcps/youtube-shorts-top-video-downloads/server.js"
+      ]
+    },
+    "video-transcricao": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "resources/mcps/video-transcricao/server.js"
+      ]
+    }
+  }
+}
