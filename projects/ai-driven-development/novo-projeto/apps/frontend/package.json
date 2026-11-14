@@ -13,7 +13,8 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "@meu-projeto/auth": "*",
-    "@meu-projeto/transactions": "*"
+    "@meu-projeto/transactions": "*",
+    "@meu-projeto/reports": "*"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",

@@ -30,7 +30,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "@meu-projeto/auth": "*",
-    "@meu-projeto/transactions": "*"
+    "@meu-projeto/transactions": "*",
+    "@meu-projeto/reports": "*"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",

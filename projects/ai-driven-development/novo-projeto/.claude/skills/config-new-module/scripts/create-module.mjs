@@ -5,6 +5,11 @@
  * Cria, de forma determinística, um novo módulo de negócio em modules/<nome>
  * dentro do monorepo (Turborepo + npm workspaces), a partir dos arquivos de
  * ../assets, e o liga aos apps frontend e backend.
+ * Também gera, com o CLI do NestJS, o módulo apps/backend/src/modules/<nome>
+ * (registrado no AppModule) com um controller padrão que expõe GET /<nome>.
+ * No frontend (Next.js), cria a rota privada src/app/(private)/<nome>/page.tsx,
+ * a página src/modules/<nome>/pages/<nome>.page.tsx e o componente
+ * src/modules/<nome>/components/<nome>.component.tsx, a partir de ../assets/frontend.
  *
  * Uso (sempre a partir da raiz do monorepo):
  *   node create-module.mjs --name <nome-do-modulo> --namespace <@escopo>
@@ -23,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 // Utilitários
 // ---------------------------------------------------------------------------
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 14;
 let currentStep = 0;
 
 const BASE_ENV = {
@@ -106,6 +111,11 @@ const root = process.cwd();
 const modulesDir = path.join(root, 'modules');
 const rootPkgPath = path.join(root, 'package.json');
 const appPkgPaths = ['frontend', 'backend'].map((app) => path.join(root, 'apps', app, 'package.json'));
+const backendDir = path.join(root, 'apps', 'backend');
+const appModulePath = path.join(backendDir, 'src', 'app.module.ts');
+
+/** kebab-case -> PascalCase (mesma regra do `classify` dos schematics do Nest). */
+const classify = (s) => s.split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
 
 // 1. Pré-requisitos ----------------------------------------------------------
 step('Verificando pré-requisitos');
@@ -130,6 +140,33 @@ ok('assets da skill presentes');
 
 assert(!exists(moduleDir), `o módulo já existe: ${moduleDir}. Remova-o manualmente ou use outro nome (o script nunca apaga nada).`);
 ok(`modules/${opts.name} ainda não existe`);
+
+const nestClass = classify(opts.name);
+const nestModuleDir = path.join(backendDir, 'src', 'modules', opts.name);
+const nestModuleFile = path.join(nestModuleDir, `${opts.name}.module.ts`);
+const nestControllerFile = path.join(nestModuleDir, `${opts.name}.controller.ts`);
+assert(exists(appModulePath), `arquivo não encontrado: ${appModulePath}. O backend precisa ser um app NestJS com src/app.module.ts.`);
+assert(exists(path.join(backendDir, 'nest-cli.json')), `nest-cli.json não encontrado em ${backendDir}.`);
+assert(!exists(nestModuleDir), `o módulo Nest já existe: ${nestModuleDir}. Remova-o manualmente ou use outro nome (o script nunca apaga nada).`);
+ok(`apps/backend/src/modules/${opts.name} ainda não existe`);
+
+const frontendDir = path.join(root, 'apps', 'frontend');
+const frontendAppDir = path.join(frontendDir, 'src', 'app');
+const frontendRouteDir = path.join(frontendAppDir, '(private)', opts.name);
+const frontendModuleDir = path.join(frontendDir, 'src', 'modules', opts.name);
+const FRONTEND_FILES = [
+  // [asset em assets/frontend, destino]
+  ['route.page.tsx', path.join(frontendRouteDir, 'page.tsx')],
+  ['module.page.tsx', path.join(frontendModuleDir, 'pages', `${opts.name}.page.tsx`)],
+  ['module.component.tsx', path.join(frontendModuleDir, 'components', `${opts.name}.component.tsx`)],
+];
+for (const [asset] of FRONTEND_FILES) {
+  assert(exists(path.join(ASSETS_DIR, 'frontend', asset)), `asset da skill ausente: ${path.join(ASSETS_DIR, 'frontend', asset)}`);
+}
+assert(exists(frontendAppDir), `pasta não encontrada: ${frontendAppDir}. O frontend precisa ser um app Next.js com src/app.`);
+assert(!exists(frontendRouteDir), `a rota já existe: ${frontendRouteDir}. Remova-a manualmente ou use outro nome (o script nunca apaga nada).`);
+assert(!exists(frontendModuleDir), `o módulo do frontend já existe: ${frontendModuleDir}. Remova-o manualmente ou use outro nome (o script nunca apaga nada).`);
+ok(`apps/frontend/src/app/(private)/${opts.name} e apps/frontend/src/modules/${opts.name} ainda não existem`);
 
 for (const p of appPkgPaths) {
   const appName = readJson(p).name || '';
@@ -246,11 +283,88 @@ ok(`modules/${opts.name}/dist gerado`);
 step(`Executando os testes do módulo (npm test -w ${packageName})`);
 run(`npm test -w ${packageName}`, root);
 
+// 10. Módulo NestJS ----------------------------------------------------------
+step(`Gerando o módulo NestJS em apps/backend/src/modules/${opts.name} (nest g module)`);
+run(`npx --no-install nest generate module modules/${opts.name}`, backendDir);
+assert(exists(nestModuleFile), `o CLI do Nest não gerou ${nestModuleFile}`);
+{
+  const appModule = fs.readFileSync(appModulePath, 'utf8');
+  assert(
+    appModule.includes(`${nestClass}Module`) && appModule.includes(`./modules/${opts.name}/${opts.name}.module.js`),
+    `${nestClass}Module não foi registrado em apps/backend/src/app.module.ts`,
+  );
+}
+ok(`apps/backend/src/modules/${opts.name}/${opts.name}.module.ts`);
+ok(`${nestClass}Module registrado no AppModule`);
+
+// 11. Controller padrão ------------------------------------------------------
+step(`Gerando o controller padrão com GET /${opts.name} (nest g controller)`);
+run(`npx --no-install nest generate controller modules/${opts.name} --no-spec`, backendDir);
+assert(exists(nestControllerFile), `o CLI do Nest não gerou ${nestControllerFile}`);
+{
+  const original = fs.readFileSync(nestControllerFile, 'utf8');
+  const importRe = /import \{ Controller \} from '@nestjs\/common';/;
+  const classRe = new RegExp(`export class ${nestClass}Controller \\{\\s*\\}`);
+  assert(importRe.test(original) && classRe.test(original), `o controller gerado não tem o formato esperado: ${nestControllerFile}`);
+  const content = original
+    .replace(importRe, "import { Controller, Get } from '@nestjs/common';")
+    .replace(
+      classRe,
+      [
+        `export class ${nestClass}Controller {`,
+        `  @Get()`,
+        `  getStatus(): { module: string; message: string } {`,
+        `    return { module: '${opts.name}', message: 'Módulo ${opts.name} funcionando' };`,
+        `  }`,
+        `}`,
+      ].join('\n'),
+    );
+  fs.writeFileSync(nestControllerFile, content, 'utf8');
+  const nestModule = fs.readFileSync(nestModuleFile, 'utf8');
+  assert(nestModule.includes(`${nestClass}Controller`), `${nestClass}Controller não foi registrado em ${nestModuleFile}`);
+}
+ok(`apps/backend/src/modules/${opts.name}/${opts.name}.controller.ts (GET /${opts.name})`);
+ok(`${nestClass}Controller registrado no ${nestClass}Module`);
+
+// 12. Build do backend -------------------------------------------------------
+const backendPkgName = readJson(path.join(backendDir, 'package.json')).name;
+step(`Compilando o backend com o novo módulo (npm run build -w ${backendPkgName})`);
+run(`npm run build -w ${backendPkgName}`, root);
+ok('backend compilado');
+
+// 13. Módulo do frontend -----------------------------------------------------
+step(`Criando o módulo no frontend (rota privada /${opts.name}, página e componente)`);
+for (const [asset, dest] of FRONTEND_FILES) {
+  const content = fs
+    .readFileSync(path.join(ASSETS_DIR, 'frontend', asset), 'utf8')
+    .replaceAll('{{MODULE}}', opts.name)
+    .replaceAll('{{CLASS}}', nestClass);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, content, 'utf8');
+  ok(path.relative(root, dest).replaceAll('\\', '/'));
+}
+if (!exists(path.join(frontendAppDir, '(private)', 'layout.tsx'))) {
+  console.log('⚠ aviso: apps/frontend/src/app/(private)/layout.tsx não existe; a rota funciona sem layout do grupo privado');
+}
+
+// 14. Build do frontend ------------------------------------------------------
+const frontendPkgName = readJson(path.join(frontendDir, 'package.json')).name;
+step(`Compilando o frontend com o novo módulo (npm run build -w ${frontendPkgName})`);
+run(`npm run build -w ${frontendPkgName}`, root);
+ok('frontend compilado');
+
 console.log(`
 === Resumo ===
 Módulo criado em: ${moduleDir}
   pacote: ${packageName}
   dependência adicionada em: apps/frontend, apps/backend
   build e testes: OK
+Módulo NestJS criado em: ${nestModuleDir}
+  ${nestClass}Module registrado em apps/backend/src/app.module.ts
+  endpoint: GET /${opts.name}
+Módulo do frontend criado em: ${frontendModuleDir}
+  rota privada: apps/frontend/src/app/(private)/${opts.name}/page.tsx  ->  /${opts.name}
+  página: src/modules/${opts.name}/pages/${opts.name}.page.tsx
+  componente: src/modules/${opts.name}/components/${opts.name}.component.tsx
 
 ✔ CONCLUÍDO COM SUCESSO`);
