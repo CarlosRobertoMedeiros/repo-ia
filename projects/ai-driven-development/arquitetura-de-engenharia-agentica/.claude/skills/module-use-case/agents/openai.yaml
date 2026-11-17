@@ -1,0 +1,4 @@
+interface:
+  display_name: "Module Use Case"
+  short_description: "Criar casos de uso padronizados com testes completos em modulos"
+  default_prompt: "Use $module-use-case para criar ou atualizar um caso de uso em modules/<modulo>, resolvendo o agregado, gerando o arquivo <nome>.usecase.ts, o teste correspondente, reaproveitando fakes existentes e garantindo cobertura de 100% para o caso de uso."

@@ -1,0 +1,211 @@
+@baseUrl = http://localhost:4000
+@adminEmail = admin.crud@example.com
+@adminPassword = Admin@12345
+@crudPassword = Senha@12345
+@newPassword = Nova@Senha789
+@missingId = 00000000-0000-4000-8000-000000000000
+
+### 0. Prepara um usuario para autenticar os testes
+# Esperado: 201 na primeira execucao; 409 (e-mail ja cadastrado) nas seguintes - ambos servem.
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin Crud",
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### 1. Login para obter o token usado nos demais cenarios
+# Esperado: 200 com { token, user }
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+@token = {{login.response.body.token}}
+
+### 2. Listar sem token
+# Esperado: 401 Unauthorized
+GET {{baseUrl}}/users
+
+### 3. Listar com token invalido
+# Esperado: 401 Unauthorized
+GET {{baseUrl}}/users
+Authorization: Bearer token.invalido.aqui
+
+### 4. Criar usuario
+# Esperado: 201 Created com { "id": "<uuid>" }
+# @name createUser
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Maria da Silva",
+  "email": "crud.{{$timestamp}}@example.com",
+  "password": "{{crudPassword}}"
+}
+
+###
+@userId = {{createUser.response.body.id}}
+
+### 5. Obter usuario por id
+# Esperado: 200 com { id, name, email } - sem password
+# @name getUser
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+###
+@userEmail = {{getUser.response.body.email}}
+
+### 6. Listar usuarios paginado
+# Esperado: 200 com { items: [{ id, name, email }], page, perPage, total } - sem password
+GET {{baseUrl}}/users?page=1&perPage=5
+Authorization: Bearer {{token}}
+
+### 7. Criar com e-mail duplicado
+# Esperado: 409 Conflict com errors ["user.email.already.registered"]
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Outra Pessoa",
+  "email": "{{userEmail}}",
+  "password": "{{crudPassword}}"
+}
+
+### 8. Criar com dados invalidos
+# Esperado: 422 com errors contendo user.name.min.length, user.name.person.name,
+# user.email.invalid.email e user.password.strong.password
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Al",
+  "email": "invalido",
+  "password": "123"
+}
+
+### 9. Criar sem senha
+# Esperado: 422 com errors contendo user.password.required
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Sem Senha",
+  "email": "sem.senha.{{$timestamp}}@example.com"
+}
+
+### 10. Atualizar nome e e-mail sem enviar senha (mantem a senha atual)
+# Esperado: 204 No Content
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Maria Souza Atualizada",
+  "email": "atualizado.{{$timestamp}}@example.com"
+}
+
+### 11. Obter apos atualizar
+# Esperado: 200 com o nome "Maria Souza Atualizada" e o novo e-mail
+# @name getUpdated
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+###
+@updatedEmail = {{getUpdated.response.body.email}}
+
+### 12. Login com o e-mail novo e a senha original (prova que a senha foi mantida)
+# Esperado: 200 com { token, user }
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{updatedEmail}}",
+  "password": "{{crudPassword}}"
+}
+
+### 13. Atualizar informando uma nova senha
+# Esperado: 204 No Content
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Maria Souza Atualizada",
+  "email": "{{updatedEmail}}",
+  "password": "{{newPassword}}"
+}
+
+### 14. Login com a senha antiga apos trocar a senha
+# Esperado: 401 Unauthorized com errors ["user.credentials.invalid"]
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{updatedEmail}}",
+  "password": "{{crudPassword}}"
+}
+
+### 15. Login com a nova senha
+# Esperado: 200 com { token, user }
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{updatedEmail}}",
+  "password": "{{newPassword}}"
+}
+
+### 16. Atualizar com o e-mail de outro usuario
+# Esperado: 409 Conflict com errors ["user.email.already.registered"]
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Maria Souza Atualizada",
+  "email": "{{adminEmail}}"
+}
+
+### 17. Atualizar com senha fraca
+# Esperado: 422 com errors contendo user.password.strong.password
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Maria Souza Atualizada",
+  "email": "{{updatedEmail}}",
+  "password": "123"
+}
+
+### 18. Obter usuario inexistente
+# Esperado: 404 Not Found com errors ["user.not_found"]
+GET {{baseUrl}}/users/{{missingId}}
+Authorization: Bearer {{token}}
+
+### 19. Excluir usuario
+# Esperado: 204 No Content
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+### 20. Excluir novamente
+# Esperado: 404 Not Found com errors ["user.not_found"]
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+### 21. Obter usuario excluido
+# Esperado: 404 Not Found com errors ["user.not_found"]
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}

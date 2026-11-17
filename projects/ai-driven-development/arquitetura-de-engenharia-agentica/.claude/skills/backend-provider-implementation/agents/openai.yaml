@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Provider Implementation"
+  short_description: "Implementar um provider tecnico do dominio no backend NestJS"
+  default_prompt: "Use $backend-provider-implementation para receber uma interface de provider do dominio em modules/<modulo>/src/**/provider/*.provider.ts, criar uma classe concreta simples no backend, registrar essa classe no modulo Nest correspondente, reutilizar ou instalar dependencias tecnicas quando necessario e permitir injecao direta da classe concreta no backend sem criar tokens extras por padrao."

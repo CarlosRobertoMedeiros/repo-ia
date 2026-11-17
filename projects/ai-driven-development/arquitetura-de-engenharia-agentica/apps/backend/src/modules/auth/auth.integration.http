@@ -1,0 +1,129 @@
+@baseUrl = http://localhost:4000
+@scenarioVersion = {{$timestamp}}
+@userEmail = usuario.{{scenarioVersion}}@example.com
+@userName = Maria da Silva
+@userPassword = Senha@12345
+
+### 1. Registro valido
+# Esperado: 201 Created, sem corpo na resposta
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "{{userName}}",
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+### 2. Registro com e-mail duplicado
+# Executar depois do cenario 1.
+# Esperado: 409 Conflict com errors ["user.email.already.registered"]
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "{{userName}}",
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+### 3. Registro com nome invalido (sem sobrenome)
+# Esperado: 422 Unprocessable Entity com errors contendo "user.name.person.name"
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Maria",
+  "email": "nome.invalido.{{scenarioVersion}}@example.com",
+  "password": "{{userPassword}}"
+}
+
+### 4. Registro com e-mail invalido
+# Esperado: 422 Unprocessable Entity com errors contendo "user.email.invalid.email"
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "{{userName}}",
+  "email": "email-invalido",
+  "password": "{{userPassword}}"
+}
+
+### 5. Registro com senha fraca
+# Esperado: 422 Unprocessable Entity com errors contendo "user.password.strong.password"
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "{{userName}}",
+  "email": "senha.fraca.{{scenarioVersion}}@example.com",
+  "password": "123456"
+}
+
+### 6. Registro com campos ausentes
+# Esperado: 422 Unprocessable Entity com errors "required" para name, email e password
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{}
+
+### 7. Tentar registrar com varios erros
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "carlos",
+  "email": "carlos.email.com",
+  "password": "123456"
+}
+
+###
+### ===================== LOGIN =====================
+### Executar depois do cenario 1 de registro (usa o mesmo {{userEmail}}).
+
+### 7. Login com credenciais validas
+# Esperado: 200 OK com { "token": "<jwt>", "user": { "id", "name", "email" } }
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+### 8. Login com e-mail inexistente
+# Esperado: 401 Unauthorized com errors ["user.credentials.invalid"]
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "inexistente.{{scenarioVersion}}@example.com",
+  "password": "{{userPassword}}"
+}
+
+### 9. Login com senha incorreta
+# Esperado: 401 Unauthorized com errors ["user.credentials.invalid"] (mesma resposta do cenario 8)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "SenhaErrada@999"
+}
+
+### 10. Login com e-mail invalido
+# Esperado: 422 Unprocessable Entity com errors contendo "user.email.invalid.email"
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "email-invalido",
+  "password": "{{userPassword}}"
+}
+
+### 11. Login com corpo incompleto
+# Esperado: 422 Unprocessable Entity com errors "user.email.required" e "user.password.required"
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{}

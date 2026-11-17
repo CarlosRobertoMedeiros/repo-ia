@@ -1,0 +1,4 @@
+interface:
+  display_name: "Config Project Fullstack"
+  short_description: "Create a Turbo fullstack baseline in the current folder"
+  default_prompt: "Use $config-project-fullstack to create a new Turbo monorepo in the current folder with Next.js frontend and NestJS backend."

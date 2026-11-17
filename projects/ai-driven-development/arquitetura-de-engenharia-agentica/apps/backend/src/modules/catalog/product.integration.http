@@ -1,0 +1,205 @@
+@baseUrl = http://localhost:4000
+@adminEmail = admin.catalogo@example.com
+@adminPassword = Admin@12345
+@missingId = 00000000-0000-4000-8000-000000000000
+
+### 0. Prepara um usuario para autenticar os testes
+# Esperado: 201 na primeira execucao; 409 (e-mail ja cadastrado) nas seguintes - ambos servem.
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin Catalogo",
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### 1. Login para obter o token usado nos demais cenarios
+# Esperado: 200 com { token, user }
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+@token = {{login.response.body.token}}
+
+### 2. Listar sem token
+# Esperado: 401 Unauthorized
+GET {{baseUrl}}/products
+
+### 3. Criar produto completo
+# Esperado: 201 Created com { "id": "<uuid>" }
+# @name createProduct
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cafe Especial",
+  "description": "Graos selecionados, torra media",
+  "price": 49.9,
+  "status": "active",
+  "availableOnline": true,
+  "featured": true,
+  "allowsPreOrder": false
+}
+
+###
+@productId = {{createProduct.response.body.id}}
+
+### 4. Obter produto por id
+# Esperado: 200 com { id, name, description, price, status, availableOnline, featured, allowsPreOrder }
+GET {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### 5. Criar produto minimo (sem descricao nem booleanos)
+# Esperado: 201 Created com { "id": "<uuid>" }
+# @name createMinimal
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cha Verde",
+  "price": 0,
+  "status": "draft"
+}
+
+### 6. Obter o produto minimo
+# Esperado: 200 com description null e availableOnline/featured/allowsPreOrder false
+GET {{baseUrl}}/products/{{createMinimal.response.body.id}}
+Authorization: Bearer {{token}}
+
+### 7. Listar produtos paginado
+# Esperado: 200 com { items: [...], page, perPage, total }
+GET {{baseUrl}}/products?page=1&perPage=5
+Authorization: Bearer {{token}}
+
+### 8. Criar com nome invalido
+# Esperado: 422 com errors contendo "product.name.min.length"
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "A",
+  "price": 10,
+  "status": "active"
+}
+
+### 9. Criar com preco negativo
+# Esperado: 422 com errors contendo "product.price.min.value"
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Produto Teste",
+  "price": -1,
+  "status": "active"
+}
+
+### 10. Criar com preco com mais de 2 casas decimais
+# Esperado: 422 com errors contendo "product.price.precision"
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Produto Teste",
+  "price": 10.999,
+  "status": "active"
+}
+
+### 11. Criar com status fora da enumeracao
+# Esperado: 422 com errors contendo "product.status.in"
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Produto Teste",
+  "price": 10,
+  "status": "archived"
+}
+
+### 12. Criar com campos obrigatorios ausentes e booleano invalido
+# Esperado: 422 com errors contendo "product.name.required", "product.price.required",
+# "product.status.required" e "product.featured.boolean"
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "featured": "sim"
+}
+
+### 13. Atualizar produto
+# Esperado: 204 No Content
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cafe Especial Reserva",
+  "description": "",
+  "price": 59.9,
+  "status": "inactive",
+  "availableOnline": false,
+  "featured": true,
+  "allowsPreOrder": true
+}
+
+### 14. Obter apos atualizar
+# Esperado: 200 com name "Cafe Especial Reserva", description null, price 59.9 e status "inactive"
+GET {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### 15. Atualizar com dados invalidos
+# Esperado: 422 com errors contendo "product.price.min.value" e "product.status.in"
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cafe Especial Reserva",
+  "price": -10,
+  "status": "archived"
+}
+
+### 16. Atualizar produto inexistente
+# Esperado: 404 Not Found com errors ["product.not_found"]
+PUT {{baseUrl}}/products/{{missingId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Produto Fantasma",
+  "price": 10,
+  "status": "active"
+}
+
+### 17. Obter produto inexistente
+# Esperado: 404 Not Found com errors ["product.not_found"]
+GET {{baseUrl}}/products/{{missingId}}
+Authorization: Bearer {{token}}
+
+### 18. Excluir produto
+# Esperado: 204 No Content
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### 19. Excluir produto inexistente (o mesmo, de novo)
+# Esperado: 404 Not Found com errors ["product.not_found"]
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### 20. Obter produto excluido
+# Esperado: 404 Not Found com errors ["product.not_found"]
+GET {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{token}}

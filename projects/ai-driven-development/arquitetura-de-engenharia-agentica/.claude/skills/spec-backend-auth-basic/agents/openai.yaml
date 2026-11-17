@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Backend Auth Basic"
+  short_description: "Orquestrar a base de autenticacao do backend com dominio, Prisma, JWT e NestJS"
+  default_prompt: "Use $spec-backend-auth-basic para orquestrar de forma deterministica a criacao ou evolucao da autenticacao basica do backend e do banco, validando o catalogo local de skills, reaproveitando as skills especializadas do projeto, cobrindo modulo de auth, agregado e entidade de usuario, repositorio, casos de uso de cadastro e login, persistencia Prisma, providers de criptografia e JWT, configuracao compartilhada do NestJS, controllers e validacao final dos testes relevantes."

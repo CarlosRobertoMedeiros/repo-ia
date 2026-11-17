@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Nest Controller"
+  short_description: "Criar controllers Nest finos com auth coerente e testes de integracao HTTP em Rest Client"
+  default_prompt: "Use $backend-nest-controller para criar ou atualizar um controller NestJS em apps/backend/src/modules/<modulo>, expondo um caso de uso real de modules/<modulo>/src/**/usecase/*.usecase.ts, reaproveitando a interface In e a saida quando possivel, integrando autenticacao apenas quando fizer sentido, respeitando a infraestrutura existente de tratamento de erros e providers do backend, e criando o arquivo correspondente <modulo>.integration.http no formato Rest Client."

@@ -1,0 +1,10 @@
+// Prisma schema root (modular mode)
+// Add per-module models under prisma/models/*.model.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Configurar Novo Modulo"
+  short_description: "Criar modulo de negocio com scaffold em modules, backend e frontend"
+  default_prompt: "Use $config-new-module para criar um novo modulo de negocio em modules com namespace informado, registrar no backend e criar a estrutura base do modulo no frontend."

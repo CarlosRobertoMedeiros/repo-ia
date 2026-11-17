@@ -1,0 +1,24 @@
+name: sdd-arquitetura-de-engenharia-agentica-backend-db
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sdd-arquitetura-de-engenharia-agentica-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sdd_arquitetura_de_engenharia_agentica
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: sdd_arquitetura_de_engenharia_agentica_db
+    ports:
+      - '5907:5432'
+    volumes:
+      - sdd-arquitetura-de-engenharia-agentica-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sdd_arquitetura_de_engenharia_agentica']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  sdd-arquitetura-de-engenharia-agentica-postgres-data:
+    driver: local

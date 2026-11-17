@@ -1,0 +1,4 @@
+interface:
+  display_name: "Module Entity"
+  short_description: "Criar ou completar entidade de dominio com validacao lazy e testes completos"
+  default_prompt: "Use $module-entity para criar ou completar uma entidade de dominio dentro de um modulo existente em modules, seguindo o padrao real do projeto, reaproveitando regras compartilhadas de validacao e gerando testes unitarios com meta explicita de 100% de cobertura para a entidade."

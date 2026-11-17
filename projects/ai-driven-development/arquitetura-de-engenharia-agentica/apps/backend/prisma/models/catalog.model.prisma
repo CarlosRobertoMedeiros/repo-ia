@@ -1,0 +1,23 @@
+enum ProductStatus {
+  active
+  inactive
+  draft
+
+  @@map("product_status")
+}
+
+model Product {
+  id              String        @id
+  name            String
+  description     String?
+  price           Decimal       @db.Decimal(12, 2)
+  status          ProductStatus
+  availableOnline Boolean       @default(false)
+  featured        Boolean       @default(false)
+  allowsPreOrder  Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  @@map("products")
+}

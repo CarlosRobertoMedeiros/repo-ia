@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Nest Config"
+  short_description: "Estruturar base compartilhada do Nest com filtro global, JWT e decorators reutilizaveis"
+  default_prompt: "Use $backend-nest-config para configurar a camada compartilhada do backend NestJS, reaproveitando a hierarquia de erros de packages/shared, criando filtro global de excecao, base de autenticacao JWT, guard e decorator de usuario autenticado, e integrando tudo ao bootstrap e aos modulos reais do projeto sem espalhar tratamento manual pelos controllers."

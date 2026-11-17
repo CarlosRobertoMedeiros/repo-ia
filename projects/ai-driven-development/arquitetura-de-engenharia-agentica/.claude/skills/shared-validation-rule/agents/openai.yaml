@@ -1,0 +1,4 @@
+interface:
+  display_name: "Criar Regra Shared"
+  short_description: "Criar regra reutilizavel de validacao no packages/shared com exports e testes completos"
+  default_prompt: "Use $shared-validation-rule para criar uma nova regra reutilizavel em packages/shared/src/validation/rules, reaproveitando os utilitarios existentes, integrando os exports e criando testes unitarios completos com cobertura total da nova regra."

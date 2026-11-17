@@ -1,0 +1,20 @@
+import { UseCase } from "__SHARED_PACKAGE__";
+import { __AGGREGATE_CLASS_NAME__ } from "../model";
+import { __AGGREGATE_REPOSITORY_NAME__ } from "../provider";
+
+export interface Create__AGGREGATE_CLASS_NAME__In {
+  entity: __AGGREGATE_CLASS_NAME__;
+}
+
+export class Create__AGGREGATE_CLASS_NAME__
+  implements UseCase<Create__AGGREGATE_CLASS_NAME__In, __AGGREGATE_CLASS_NAME__>
+{
+  constructor(
+    private readonly __AGGREGATE_VARIABLE_NAME__Repository: __AGGREGATE_REPOSITORY_NAME__,
+  ) {}
+
+  async execute(input: Create__AGGREGATE_CLASS_NAME__In): Promise<__AGGREGATE_CLASS_NAME__> {
+    // Exemplo minimo para deixar a estrutura pronta para evolucao manual.
+    return this.__AGGREGATE_VARIABLE_NAME__Repository.create(input.entity);
+  }
+}

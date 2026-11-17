@@ -1,0 +1,4 @@
+interface:
+  display_name: "Configurar Package Shared"
+  short_description: "Reconstruir o pacote shared ou criar variantes como shared-v2 com scope dinamico"
+  default_prompt: "Use $config-package-shared para recriar deterministicamente o packages/shared ou materializar uma variante como packages/shared-v2 a partir da copia canonica embutida na skill, detectando o scope real do monorepo e normalizando dependencias apenas quando fizer sentido."

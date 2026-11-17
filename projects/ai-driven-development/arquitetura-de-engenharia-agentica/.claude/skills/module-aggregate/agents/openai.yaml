@@ -1,0 +1,4 @@
+interface:
+  display_name: "Module Aggregate"
+  short_description: "Criar o scaffold base de um agregado em um modulo existente"
+  default_prompt: "Use $module-aggregate para criar de forma deterministica a estrutura base de um agregado dentro de modules/<modulo>, com model, provider, usecase, index.ts e modo de casos de uso em crud ou example."
